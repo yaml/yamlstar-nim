@@ -17,7 +17,7 @@ import std/[dynlib, json, os, strutils]
 # This value is automatically updated by 'make bump'.
 # The version number is used to find the correct shared library file.
 # We currently only support binding to an exact version of libyamlstar.
-const yamlstarVersion* = "0.1.18"
+const yamlstarVersion* = "0.1.19"
 
 # We currently only support platforms that GraalVM supports.
 # Windows uses an unversioned file name, matching the Python binding:
@@ -40,7 +40,7 @@ type
   ): cint {.cdecl.}
   TearDownIsolateFn = proc (thread: pointer): cint {.cdecl.}
   LoadYamlstarFn = proc (
-    thread: pointer, input: cstring,
+    thread: pointer, input: cstring, optsJson: cstring,
   ): cstring {.cdecl.}
 
   ## The YAMLStar type is the main user facing API for this module.
@@ -122,7 +122,7 @@ proc load*(ys: YAMLStar, input: string): JsonNode =
   ys.error = nil
 
   # Call 'yamlstar_load' function in libyamlstar shared library:
-  let respPtr = ys.loadYamlstar(ys.isolateThread, input.cstring)
+  let respPtr = ys.loadYamlstar(ys.isolateThread, input.cstring, "{}")
   if respPtr == nil:
     raise newException(YAMLStarError, "Null response from 'libyamlstar'")
 
